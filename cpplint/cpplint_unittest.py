@@ -1826,16 +1826,14 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('DoSth();\\', '')
     # Test that there is no warning about semicolon here.
     self.TestLint('abc;// this is abc',
-                  'At least two spaces is best between code'
+                  'At least one space is best between code'
                   ' and comments  [whitespace/comments] [2]')
     self.TestLint('while (foo) {', '')
     self.TestLint('switch (foo) {', '')
     self.TestLint('foo( bar)', 'Extra space after ( in function call'
                   '  [whitespace/parens] [4]')
     self.TestLint('foo(  // comment', '')
-    self.TestLint('foo( // comment',
-                  'At least two spaces is best between code'
-                  ' and comments  [whitespace/comments] [2]')
+    self.TestLint('foo( // comment', '')
     self.TestLint('foobar( \\', '')
     self.TestLint('foobar(     \\', '')
     self.TestLint('( a + b)', 'Extra space after ('
@@ -2170,25 +2168,22 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('// See also similar TODO above', '')
 
   def testTwoSpacesBetweenCodeAndComments(self):
-    self.TestLint('} // namespace foo',
-                  'At least two spaces is best between code and comments'
-                  '  [whitespace/comments] [2]')
+    self.TestLint('} // namespace foo', '')
     self.TestLint('}// namespace foo',
-                  'At least two spaces is best between code and comments'
+                  'At least one space is best between code and comments'
                   '  [whitespace/comments] [2]')
-    self.TestLint('printf("foo"); // Outside quotes.',
-                  'At least two spaces is best between code and comments'
+    self.TestLint('printf("foo");// Outside quotes.',
+                  'At least one space is best between code and comments'
                   '  [whitespace/comments] [2]')
     self.TestLint('int i = 0;  // Having two spaces is fine.', '')
     self.TestLint('int i = 0;   // Having three spaces is OK.', '')
     self.TestLint('// Top level comment', '')
-    self.TestLint('  // Line starts with two spaces.', '')
     self.TestLint('foo();\n'
                   '{ // A scope is opening.', '')
     self.TestLint('  foo();\n'
                   '  { // An indented scope is opening.', '')
-    self.TestLint('if (foo) { // not a pure scope; comment is too close!',
-                  'At least two spaces is best between code and comments'
+    self.TestLint('if (foo) {// not a pure scope; comment is too close!',
+                  'At least one space is best between code and comments'
                   '  [whitespace/comments] [2]')
     self.TestLint('printf("// In quotes.")', '')
     self.TestLint('printf("\\"%s // In quotes.")', '')
