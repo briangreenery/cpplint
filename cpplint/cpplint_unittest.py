@@ -301,12 +301,12 @@ class CpplintTest(CpplintTestBase):
         '// Hello',
         '')
     self.TestLint(
-        '// ' + 'x' * 80,
-        'Lines should be <= 80 characters long'
+        '// ' + 'x' * 120,
+        'Lines should be <= 120 characters long'
         '  [whitespace/line_length] [2]')
     self.TestLint(
-        '// ' + 'x' * 100,
-        'Lines should very rarely be longer than 100 characters'
+        '// ' + 'x' * 150,
+        'Lines should very rarely be longer than 150 characters'
         '  [whitespace/line_length] [4]')
     self.TestLint(
         '// http://g' + ('o' * 100) + 'gle.com/',
@@ -315,8 +315,8 @@ class CpplintTest(CpplintTestBase):
         '//   https://g' + ('o' * 100) + 'gle.com/',
         '')
     self.TestLint(
-        '//   https://g' + ('o' * 60) + 'gle.com/ and some comments',
-        'Lines should be <= 80 characters long'
+        '//   https://g' + ('o' * 100) + 'gle.com/ and some comments',
+        'Lines should be <= 120 characters long'
         '  [whitespace/line_length] [2]')
     self.TestLint(
         '// Read https://g' + ('o' * 60) + 'gle.com/' ,
@@ -325,8 +325,8 @@ class CpplintTest(CpplintTestBase):
         '// $Id: g' + ('o' * 80) + 'gle.cc#1 $',
         '')
     self.TestLint(
-        '// $Id: g' + ('o' * 80) + 'gle.cc#1',
-        'Lines should be <= 80 characters long'
+        '// $Id: g' + ('o' * 120) + 'gle.cc#1',
+        'Lines should be <= 120 characters long'
         '  [whitespace/line_length] [2]')
 
   # Test error suppression annotations.
