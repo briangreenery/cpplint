@@ -2610,12 +2610,6 @@ class CpplintTest(CpplintTestBase):
         };""",
         '')
 
-  def testTab(self):
-    self.TestLint('\tint a;',
-                  'Tab found; better to use spaces  [whitespace/tab] [1]')
-    self.TestLint('int a = 5;\t\t// set a to 5',
-                  'Tab found; better to use spaces  [whitespace/tab] [1]')
-
   def testParseArguments(self):
     old_usage = cpplint._USAGE
     old_error_categories = cpplint._ERROR_CATEGORIES
