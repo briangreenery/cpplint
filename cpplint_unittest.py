@@ -2291,7 +2291,7 @@ class CpplintTest(CpplintTestBase):
     cpplint.ProcessFileData(
         'nul_utf8.cc', 'cc',
         ['// Copyright 2008 Your Company.',
-         unicode('\xe9x\0', 'utf8', 'replace'), ''],
+         unicode('\0\xe9x', 'utf8', 'replace'), ''],
         error_collector)
     self.assertEquals(
         error_collector.Results(),
