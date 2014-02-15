@@ -3031,12 +3031,6 @@ class CpplintTest(CpplintTestBase):
     self.assertEquals('CPPLINT_CPPLINT_TEST_HEADER_H_',
                       cpplint.GetHeaderGuardCPPVariable(file_path))
 
-  def testBuildInclude(self):
-    # Test that include statements have slashes in them.
-    self.TestLint('#include "foo.h"',
-                  'Include the directory when naming .h files'
-                  '  [build/include] [4]')
-
   def testBuildPrintfFormat(self):
     self.TestLint(
         r'printf("\%%d", value);',
