@@ -3159,48 +3159,6 @@ class CpplintTest(CpplintTestBase):
           storage_class + ' ' + ' '.join(other_decl_specs),
           '')
 
-  def testLegalCopyright(self):
-    legal_copyright_message = (
-        'No copyright message found.  '
-        'You should have a line: "Copyright [year] <Copyright Owner>"'
-        '  [legal/copyright] [5]')
-
-    copyright_line = '// Copyright 2008 Google Inc. All Rights Reserved.'
-
-    file_path = 'mydir/googleclient/foo.cc'
-
-    # There should be a copyright message in the first 10 lines
-    error_collector = ErrorCollector(self.assert_)
-    cpplint.ProcessFileData(file_path, 'cc', [], error_collector)
-    self.assertEquals(
-        1,
-        error_collector.ResultList().count(legal_copyright_message))
-
-    error_collector = ErrorCollector(self.assert_)
-    cpplint.ProcessFileData(
-        file_path, 'cc',
-        ['' for unused_i in range(10)] + [copyright_line],
-        error_collector)
-    self.assertEquals(
-        1,
-        error_collector.ResultList().count(legal_copyright_message))
-
-    # Test that warning isn't issued if Copyright line appears early enough.
-    error_collector = ErrorCollector(self.assert_)
-    cpplint.ProcessFileData(file_path, 'cc', [copyright_line], error_collector)
-    for message in error_collector.ResultList():
-      if message.find('legal/copyright') != -1:
-        self.fail('Unexpected error: %s' % message)
-
-    error_collector = ErrorCollector(self.assert_)
-    cpplint.ProcessFileData(
-        file_path, 'cc',
-        ['' for unused_i in range(9)] + [copyright_line],
-        error_collector)
-    for message in error_collector.ResultList():
-      if message.find('legal/copyright') != -1:
-        self.fail('Unexpected error: %s' % message)
-
   def testInvalidIncrement(self):
     self.TestLint('*count++;',
                   'Changing pointer instead of value (or unused value of '

@@ -153,7 +153,6 @@ _ERROR_CATEGORIES = [
   'build/namespaces',
   'build/printf_format',
   'build/storage_class',
-  'legal/copyright',
   'readability/alt_tokens',
   'readability/braces',
   'readability/casting',
@@ -1355,19 +1354,6 @@ def ReverseCloseExpression(clean_lines, linenum, pos):
 
   # Did not find startchar before beginning of file, give up
   return (line, 0, -1)
-
-
-def CheckForCopyright(filename, lines, error):
-  """Logs an error if no Copyright message appears at the top of the file."""
-
-  # We'll say it should occur by line 10. Don't forget there's a
-  # dummy line at the front.
-  for line in xrange(1, min(len(lines), 11)):
-    if re.search(r'Copyright', lines[line], re.I): break
-  else:                       # means no copyright line was found
-    error(filename, 0, 'legal/copyright', 5,
-          'No copyright message found.  '
-          'You should have a line: "Copyright [year] <Copyright Owner>"')
 
 
 def GetHeaderGuardCPPVariable(filename):
@@ -4549,8 +4535,6 @@ def ProcessFileData(filename, file_extension, lines, error,
   nesting_state = _NestingState()
 
   ResetNolintSuppressions()
-
-  CheckForCopyright(filename, lines, error)
 
   if file_extension == 'h':
     CheckForHeaderGuard(filename, lines, error)
