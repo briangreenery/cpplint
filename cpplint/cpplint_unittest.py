@@ -1571,7 +1571,7 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('true and true',
                   'Use operator && instead of and'
                   '  [readability/alt_tokens] [2]')
-    self.TestLint('if (not true)',
+    self.TestLint('if ( not true )',
                   'Use operator ! instead of not'
                   '  [readability/alt_tokens] [2]')
     self.TestLint('1 bitor 1',
@@ -1601,7 +1601,7 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('line_continuation or',
                   'Use operator || instead of or'
                   '  [readability/alt_tokens] [2]')
-    self.TestLint('if(true and(parentheses',
+    self.TestLint('if ( true and ( parentheses',
                   'Use operator && instead of and'
                   '  [readability/alt_tokens] [2]')
 
@@ -1768,18 +1768,30 @@ class CpplintTest(CpplintTestBase):
         '')
 
   def testMismatchingSpacesInParens(self):
-    self.TestLint('if (foo ) {', 'Mismatching spaces inside () in if'
+    self.TestLint('if (foo )',
+                  'Should have one space inside () in if'
                   '  [whitespace/parens] [5]')
-    self.TestLint('switch ( foo) {', 'Mismatching spaces inside () in switch'
+    self.TestLint('if ( foo )', '')
+    self.TestLint('switch ( foo)',
+                  'Should have one space inside () in switch'
                   '  [whitespace/parens] [5]')
-    self.TestLint('for (foo; ba; bar ) {', 'Mismatching spaces inside () in for'
+    self.TestLint('switch ( foo )', '')
+    self.TestLint('for (foo; ba; bar )',
+                  'Should have one space inside () in for'
                   '  [whitespace/parens] [5]')
-    self.TestLint('for (; foo; bar) {', '')
-    self.TestLint('for ( ; foo; bar) {', '')
-    self.TestLint('for ( ; foo; bar ) {', '')
-    self.TestLint('for (foo; bar; ) {', '')
-    self.TestLint('while (  foo  ) {', 'Should have zero or one spaces inside'
-                  ' ( and ) in while  [whitespace/parens] [5]')
+    self.TestLint('for (; foo; bar)',
+                  'Should have one space inside () in for'
+                  '  [whitespace/parens] [5]')
+    self.TestLint('for ( ; foo; bar)',
+                  'Should have one space inside () in for'
+                  '  [whitespace/parens] [5]')
+    self.TestLint('for ( ; foo; bar )', '')
+    self.TestLint('for (foo; bar; )',
+                  'Should have one space inside () in for'
+                  '  [whitespace/parens] [5]')
+    self.TestLint('while (  foo  )',
+                  'Should have one space inside () in while'
+                  '  [whitespace/parens] [5]')
 
   def testSpacingForFncall(self):
     self.TestLint('if (foo) {', '')
@@ -1802,7 +1814,7 @@ class CpplintTest(CpplintTestBase):
                   ' and comments  [whitespace/comments] [2]')
     self.TestLint('while (foo) {', '')
     self.TestLint('switch (foo) {', '')
-    self.TestLint('foo( bar)', 'Mismatching spaces inside () in function call'
+    self.TestLint('foo( bar)', 'Missing space before )'
                   '  [whitespace/parens] [4]')
     self.TestLint('foo(  // comment', '')
     self.TestLint('foo( // comment', '')
@@ -1811,7 +1823,7 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('( a + b)', 'Mismatching spaces inside ()'
                   '  [whitespace/parens] [2]')
     self.TestLint('((a+b))', '')
-    self.TestLint('foo (foo)', 'Extra space before ( in function call'
+    self.TestLint('foo ( foo )', 'Extra space before ( in function call'
                   '  [whitespace/parens] [4]')
     self.TestLint('} catch (const Foo& ex) {', '')
     self.TestLint('typedef foo (*foo)(foo)', '')
@@ -1982,34 +1994,34 @@ class CpplintTest(CpplintTestBase):
     self.TestLint('for (int i = 0; ;', '')
 
   def testEmptyBlockBody(self):
-    self.TestLint('while (true);',
+    self.TestLint('while ( true );',
                   'Empty loop bodies should use {} or continue'
                   '  [whitespace/empty_loop_body] [5]')
-    self.TestLint('if (true);',
+    self.TestLint('if ( true );',
                   'Empty conditional bodies should use {}'
                   '  [whitespace/empty_conditional_body] [5]')
-    self.TestLint('while (true)', '')
-    self.TestLint('while (true) continue;', '')
-    self.TestLint('for (;;);',
+    self.TestLint('while ( true )', '')
+    self.TestLint('while ( true ) continue;', '')
+    self.TestLint('for ( ;; );',
                   'Empty loop bodies should use {} or continue'
                   '  [whitespace/empty_loop_body] [5]')
-    self.TestLint('for (;;)', '')
-    self.TestLint('for (;;) continue;', '')
-    self.TestLint('for (;;) func();', '')
-    self.TestMultiLineLint("""while (true &&
-                                     false);""",
+    self.TestLint('for ( ;; )', '')
+    self.TestLint('for ( ;; ) continue;', '')
+    self.TestLint('for ( ;; ) func();', '')
+    self.TestMultiLineLint("""while ( true &&
+                                      false );""",
                            'Empty loop bodies should use {} or continue'
                            '  [whitespace/empty_loop_body] [5]')
     self.TestMultiLineLint("""do {
-                           } while (false);""",
+                           } while ( false );""",
                            '')
     self.TestMultiLineLint("""#define MACRO \\
                            do { \\
-                           } while (false);""",
+                           } while ( false );""",
                            '')
     self.TestMultiLineLint("""do {
-                           } while (false);  // next line gets a warning
-                           while (false);""",
+                           } while ( false );  // next line gets a warning
+                           while ( false );""",
                            'Empty loop bodies should use {} or continue'
                            '  [whitespace/empty_loop_body] [5]')
 

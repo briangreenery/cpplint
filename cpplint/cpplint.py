@@ -2197,7 +2197,10 @@ def CheckSpacingForFunctionCall(filename, line, linenum, error):
       not Search(r' \([^)]+\)\[[^\]]+\]', fncall)):
     if Search(r'\w\s*\([^\s\)$]', fncall):      # a ( used for a fn call
       error(filename, linenum, 'whitespace/parens', 4,
-            'Missing space after ( in function call')
+            'Missing space after (')
+    elif Search(r'[^(\s]\)', fncall):
+      error(filename, linenum, 'whitespace/parens', 4,
+            'Missing space before )')
     if (Search(r'\w\s+\(', fncall) and
         not Search(r'#\s*define|typedef', fncall) and
         not Search(r'\w\s+\((\w+::)*\*\w+\)\(', fncall)):
@@ -2486,8 +2489,8 @@ def CheckSpacing(filename, clean_lines, linenum, nesting_state, error):
   """Checks for the correctness of various spacing issues in the code.
 
   Things we check for: spaces around operators, spaces after
-  if/for/while/switch, no spaces around parens in function calls, two
-  spaces between code and comment, don't start a block with a blank
+  if/for/while/switch, spaces inside parens in function calls, one
+  space between code and comment, don't start a block with a blank
   line, don't end a function with a blank line, don't add a blank line
   after public/protected/private, don't have too many blank lines in a row.
 
@@ -2588,10 +2591,8 @@ def CheckSpacing(filename, clean_lines, linenum, nesting_state, error):
     # Comparisons made explicit for clarity -- pylint: disable=g-explicit-bool-comparison
     if (line.count('"', 0, commentpos) -
         line.count('\\"', 0, commentpos)) % 2 == 0:   # not in quotes
-      # Allow one space for new scopes, two spaces otherwise:
-      if (not Match(r'^\s*{ //', line) and
-          ((commentpos >= 1 and
-            line[commentpos-1] not in string.whitespace))):
+      # Require one space before the comment:
+      if commentpos >= 1 and line[commentpos-1] not in string.whitespace:
         error(filename, linenum, 'whitespace/comments', 2,
               'At least one space is best between code and comments')
       # There should always be a space between the // and the comment
@@ -2699,29 +2700,20 @@ def CheckSpacing(filename, clean_lines, linenum, nesting_state, error):
           'Extra space for operator %s' % match.group(1))
 
   # A pet peeve of mine: no spaces after an if, while, switch, or for
-  match = Search(r' (if\(|for\(|while\(|switch\()', line)
+  match = Search(r'\b(if\(|for\(|while\(|switch\()', line)
   if match:
     error(filename, linenum, 'whitespace/parens', 5,
           'Missing space before ( in %s' % match.group(1))
 
-  # For if/for/while/switch, the left and right parens should be
-  # consistent about how many spaces are inside the parens, and
-  # there should either be zero or one spaces inside the parens.
-  # We don't want: "if ( foo)" or "if ( foo   )".
-  # Exception: "for ( ; foo; bar)" and "for (foo; bar; )" are allowed.
+  # For if/for/while/switch, there should be exactly one space inside
+  # the parenthesis.
   match = Search(r'\b(if|for|while|switch)\s*'
-                 r'\(([ ]*)(.).*[^ ]+([ ]*)\)\s*{\s*$',
+                 r'\(([ ]*)(.).*[^ ]+([ ]*)\)\s*$',
                  line)
   if match:
-    if len(match.group(2)) != len(match.group(4)):
-      if not (match.group(3) == ';' and
-              len(match.group(2)) == 1 + len(match.group(4)) or
-              not match.group(2) and Search(r'\bfor\s*\(.*; \)', line)):
-        error(filename, linenum, 'whitespace/parens', 5,
-              'Mismatching spaces inside () in %s' % match.group(1))
-    if len(match.group(2)) not in [0, 1]:
+    if len(match.group(2)) != 1 or len(match.group(4)) != 1:
       error(filename, linenum, 'whitespace/parens', 5,
-            'Should have zero or one spaces inside ( and ) in %s' %
+            'Should have one space inside () in %s' %
             match.group(1))
 
   # You should always have a space after a comma (either as fn arg or operator)
