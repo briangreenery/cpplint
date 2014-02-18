@@ -2145,7 +2145,7 @@ def CheckForNonStandardConstructs(filename, clean_lines, linenum,
                % re.escape(base_classname),
                line)
   if (args and
-      args.group(1) != 'void' and
+      args.group(1).strip() != 'void' and
       not Match(r'(const\s+)?%s(\s+const)?\s*(?:<\w+>\s*)?&'
                 % re.escape(base_classname), args.group(1).strip())):
     error(filename, linenum, 'runtime/explicit', 5,
@@ -2176,14 +2176,13 @@ def CheckSpacingForFunctionCall(filename, line, linenum, error):
       fncall = match.group(1)    # look inside the parens for function calls
       break
 
-  # Except in if/for/while/switch, there should never be space
-  # immediately inside parens (eg "f( 3, 4 )").  We make an exception
-  # for nested parens ( (a+b) + c ).  Likewise, there should never be
-  # a space before a ( when it's a function argument.  I assume it's a
-  # function argument when the char before the whitespace is legal in
-  # a function name (alnum + _) and we're not starting a macro. Also ignore
-  # pointers and references to arrays and functions coz they're too tricky:
-  # we use a very simple way to recognize these:
+  # There should always be one space immediately inside function call parens
+  # (eg "f( 3, 4 )").
+  # Likewise, there should never be a space before a ( when it's a function
+  # argument.  I assume it's a function argument when the char before the
+  # whitespace is legal in a function name (alnum + _) and we're not starting a
+  # macro. Also ignore pointers and references to arrays and functions coz
+  # they're too tricky: we use a very simple way to recognize these:
   # " (something)(maybe-something)" or
   # " (something)(maybe-something," or
   # " (something)[something]"
@@ -2196,28 +2195,17 @@ def CheckSpacingForFunctionCall(filename, line, linenum, error):
       not Search(r' \([^)]+\)\([^)]*(\)|,$)', fncall) and
       # Ignore pointers/references to arrays.
       not Search(r' \([^)]+\)\[[^\]]+\]', fncall)):
-    if Search(r'\w\s*\(\s(?!\s*\\$)', fncall):      # a ( used for a fn call
+    if Search(r'\w\s*\([^\s\)$]', fncall):      # a ( used for a fn call
       error(filename, linenum, 'whitespace/parens', 4,
-            'Extra space after ( in function call')
-    elif Search(r'\(\s+(?!(\s*\\)|\()', fncall):
-      error(filename, linenum, 'whitespace/parens', 2,
-            'Extra space after (')
+            'Missing space after ( in function call')
     if (Search(r'\w\s+\(', fncall) and
         not Search(r'#\s*define|typedef', fncall) and
         not Search(r'\w\s+\((\w+::)*\*\w+\)\(', fncall)):
       error(filename, linenum, 'whitespace/parens', 4,
             'Extra space before ( in function call')
-    # If the ) is followed only by a newline or a { + newline, assume it's
-    # part of a control statement (if/while/etc), and don't complain
-    if Search(r'[^)]\s+\)\s*[^{\s]', fncall):
-      # If the closing parenthesis is preceded by only whitespaces,
-      # try to give a more descriptive error message.
-      if Search(r'^\s+\)', fncall):
-        error(filename, linenum, 'whitespace/parens', 2,
-              'Closing ) should be moved to the previous line')
-      else:
-        error(filename, linenum, 'whitespace/parens', 2,
-              'Extra space before )')
+    if Search(r'^\s+\)', fncall):
+      error(filename, linenum, 'whitespace/parens', 2,
+            'Closing ) should be moved to the previous line')
 
 
 def IsBlankLine(line):
@@ -3249,7 +3237,7 @@ def CheckCheck(filename, clean_lines, linenum, error):
     # We are still keeping the less descriptive message because if lhs
     # or rhs gets long, the error message might become unreadable.
     error(filename, linenum, 'readability/check', 2,
-          'Consider using %s instead of %s(a %s b)' % (
+          'Consider using %s instead of %s( a %s b )' % (
               _CHECK_REPLACEMENT[check_macro][operator],
               check_macro, operator))
 
@@ -3847,8 +3835,8 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
   if match and match.group(2) != '0':
     # If 2nd arg is zero, snprintf is used to calculate size.
     error(filename, linenum, 'runtime/printf', 3,
-          'If you can, use sizeof(%s) instead of %s as the 2nd arg '
-          'to snprintf.' % (match.group(1), match.group(2)))
+          'If you can, use sizeof( %s ) instead of %s as the 2nd arg '
+          'to snprintf.' % (match.group(1).strip(), match.group(2).strip()))
 
   # Check if some verboten C functions are being used.
   if Search(r'\bsprintf\b', line):
@@ -3884,20 +3872,21 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
   #       boy_this_is_a_really_long_variable_that_cannot_fit_on_the_prev_line);
   printf_args = _GetTextInside(line, r'(?i)\b(string)?printf\s*\(')
   if printf_args:
-    match = Match(r'([\w.\->()]+)$', printf_args)
+    match = Match(r'([\w.\->()]+)$', printf_args.strip())
     if match and match.group(1) != '__VA_ARGS__':
       function_name = re.search(r'\b((?:string)?printf)\s*\(',
                                 line, re.I).group(1)
       error(filename, linenum, 'runtime/printf', 4,
-            'Potential format string bug. Do %s("%%s", %s) instead.'
+            'Potential format string bug. Do %s( "%%s", %s ) instead.'
             % (function_name, match.group(1)))
 
   # Check for potential memset bugs like memset(buf, sizeof(buf), 0).
-  match = Search(r'memset\s*\(([^,]*),\s*([^,]*),\s*0\s*\)', line)
-  if match and not Match(r"^''|-?[0-9]+|0x[0-9A-Fa-f]$", match.group(2)):
+  match = Search(r'memset\s*\(([^,]*),([^,]*),\s*0\s*\)', line)
+  if (match
+      and not Match(r"^''|-?[0-9]+|0x[0-9A-Fa-f]$", match.group(2).strip())):
     error(filename, linenum, 'runtime/memset', 4,
-          'Did you mean "memset(%s, 0, %s)"?'
-          % (match.group(1), match.group(2)))
+          'Did you mean "memset( %s, 0, %s )"?'
+          % (match.group(1).strip(), match.group(2).strip()))
 
   if Search(r'\busing namespace\b', line):
     error(filename, linenum, 'build/namespaces', 5,
@@ -3920,7 +3909,7 @@ def CheckLanguage(filename, clean_lines, linenum, file_extension,
         continue
 
       if Search(r'sizeof\(.+\)', tok): continue
-      if Search(r'arraysize\(\w+\)', tok): continue
+      if Search(r'arraysize\(\s*\w+\s*\)', tok): continue
 
       tok = tok.lstrip('(')
       tok = tok.rstrip(')')
