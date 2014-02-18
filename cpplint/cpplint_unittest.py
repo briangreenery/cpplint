@@ -1196,31 +1196,6 @@ class CpplintTest(CpplintTestBase):
                   ' for improved thread safety.'
                   '  [runtime/threadsafe_fn] [2]')
 
-  def testVlogMisuse(self):
-    self.TestLint('VLOG(1)', '')
-    self.TestLint('VLOG(99)', '')
-    self.TestLint('LOG(ERROR)', '')
-    self.TestLint('LOG(INFO)', '')
-    self.TestLint('LOG(WARNING)', '')
-    self.TestLint('LOG(FATAL)', '')
-    self.TestLint('LOG(DFATAL)', '')
-    self.TestLint('VLOG(SOMETHINGWEIRD)', '')
-    self.TestLint('MYOWNVLOG(ERROR)', '')
-    errmsg = ('VLOG() should be used with numeric verbosity level.  '
-              'Use LOG() if you want symbolic severity levels.'
-              '  [runtime/vlog] [5]')
-    self.TestLint('VLOG(ERROR)', errmsg)
-    self.TestLint('VLOG(INFO)', errmsg)
-    self.TestLint('VLOG(WARNING)', errmsg)
-    self.TestLint('VLOG(FATAL)', errmsg)
-    self.TestLint('VLOG(DFATAL)', errmsg)
-    self.TestLint('  VLOG(ERROR)', errmsg)
-    self.TestLint('  VLOG(INFO)', errmsg)
-    self.TestLint('  VLOG(WARNING)', errmsg)
-    self.TestLint('  VLOG(FATAL)', errmsg)
-    self.TestLint('  VLOG(DFATAL)', errmsg)
-
-
   # Test potential format string bugs like printf(foo).
   def testFormatStrings(self):
     self.TestLint('printf("foo")', '')

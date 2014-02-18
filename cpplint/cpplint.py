@@ -182,7 +182,6 @@ _ERROR_CATEGORIES = [
   'runtime/references',
   'runtime/string',
   'runtime/threadsafe_fn',
-  'runtime/vlog',
   'whitespace/blank_line',
   'whitespace/braces',
   'whitespace/comma',
@@ -1577,25 +1576,6 @@ def CheckPosixThreading(filename, clean_lines, linenum, error):
             'Consider using ' + multithread_safe_function +
             '...) instead of ' + single_thread_function +
             '...) for improved thread safety.')
-
-
-def CheckVlogArguments(filename, clean_lines, linenum, error):
-  """Checks that VLOG() is only used for defining a logging level.
-
-  For example, VLOG(2) is correct. VLOG(INFO), VLOG(WARNING), VLOG(ERROR), and
-  VLOG(FATAL) are not.
-
-  Args:
-    filename: The name of the current file.
-    clean_lines: A CleansedLines instance containing the file.
-    linenum: The number of the line to check.
-    error: The function to call with any errors found.
-  """
-  line = clean_lines.elided[linenum]
-  if Search(r'\bVLOG\((INFO|ERROR|WARNING|DFATAL|FATAL)\)', line):
-    error(filename, linenum, 'runtime/vlog', 5,
-          'VLOG() should be used with numeric verbosity level.  '
-          'Use LOG() if you want symbolic severity levels.')
 
 
 # Matches invalid increment: *count++, which moves pointer instead of
@@ -4494,7 +4474,6 @@ def ProcessLine(filename, file_extension, clean_lines, line,
   CheckForNonConstReference(filename, clean_lines, line, nesting_state, error)
   CheckForNonStandardConstructs(filename, clean_lines, line,
                                 nesting_state, error)
-  CheckVlogArguments(filename, clean_lines, line, error)
   CheckPosixThreading(filename, clean_lines, line, error)
   CheckInvalidIncrement(filename, clean_lines, line, error)
   CheckMakePairUsesDeduction(filename, clean_lines, line, error)
